@@ -33,11 +33,12 @@ done
 
 echo "📂  Cleaning WordPress install at: $ROOT_DIR"
 
-# 1. Delete everything except wp-config.php & wp-content/
-find "$ROOT_DIR" -mindepth 1 \
-  ! -path "$ROOT_DIR/wp-config.php" \
-  ! -path "$ROOT_DIR/wp-content/*" \
-  -exec rm -rf {} +
+# todo: not safe need more work
+# # 1. Delete everything except wp-config.php & wp-content/
+# find "$ROOT_DIR" -mindepth 1 \
+#   ! -path "$ROOT_DIR/wp-config.php" \
+#   ! -path "$ROOT_DIR/wp-content/*" \
+#   -exec rm -rf {} +
 
 # 2. Remove ELF binaries
 echo "   • Removing ELF binaries..."
