@@ -21,7 +21,7 @@ curl -sSL https://raw.githubusercontent.com/kalprajsolutions/wp-hack-fix/main/wp
 ### 🔧 Features
 
 * **Process shutdown**: Stops all processes owned by the current user to halt running malware.
-* **Selective cleanup**: Deletes everything except `wp-config.php` and `wp-content/` in each WP install.
+* TODO: **Selective cleanup**: Deletes everything except `wp-config.php` and `wp-content/` in each WP install.
 * **ELF binary removal**: Scans for and removes ELF payloads commonly dropped by attackers.
 * **Suspicious code scan**: Flags any PHP files containing `eval(` or `base64_decode(` for manual review.
 * **Core restoration**: Re-downloads a clean WordPress core via WP‑CLI (`wp core download --skip-content --force`).
