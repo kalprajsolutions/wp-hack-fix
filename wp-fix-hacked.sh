@@ -4,52 +4,53 @@ set -euo pipefail
 # ----------------------
 # wp-fix-hacked.sh
 # ----------------------
-# Usage: wp-fix-hacked.sh [ROOT_DIR]
-# Default ROOT_DIR: /var/www
+# Usage: cd /path/to/your/wp-install && bash wp-fix-hacked.sh
+# Or: bash wp-fix-hacked.sh /path/to/your/wp-install
+# Default: current directory
 # ----------------------
 
-ROOT_DIR="${1:-/var/www}"
-USER="$(whoami)"
+# Determine target directory
+if [ $# -gt 0 ]; then
+  ROOT_DIR="$1"
+else
+  ROOT_DIR="$(pwd)"
+fi
 
-echo "🛑  Stopping all processes for user '$USER'..."
-pkill -u "$USER" || true
-
-echo "🔍  Searching for WordPress installations in $ROOT_DIR..."
-mapfile -t INSTALL_DIRS < <(find "$ROOT_DIR" -type f -name wp-config.php -printf '%h
-')
-
-if [ ${#INSTALL_DIRS[@]} -eq 0 ]; then
-  echo "⚠️  No wp-config.php found under $ROOT_DIR. Exiting."
+# Ensure we’re in a WP install
+if [ ! -f "$ROOT_DIR/wp-config.php" ]; then
+  echo "⚠️  No wp-config.php found in $ROOT_DIR. Please run this from a WordPress install directory."
   exit 1
 fi
 
-for DIR in "${INSTALL_DIRS[@]}"; do
-  echo -e "
-📂  Cleaning installation at: $DIR"
+USER="$(whoami)"
+echo "🛑  Stopping all processes for user '$USER'..."
+pkill -u "$USER" || true
 
-  # 1. Delete everything except wp-config.php & wp-content/
-  find "$DIR" -mindepth 1 \
-    ! -path "$DIR/wp-config.php" \
-    ! -path "$DIR/wp-content*" \
-    -exec rm -rf {} +
+echo "📂  Cleaning WordPress install at: $ROOT_DIR"
 
-  # 2. Remove ELF binaries
-  echo "   • Removing ELF binaries..."
-  find "$DIR" -type f -exec sh -c \
-    'file "$1" | grep -q ELF && echo "     ↳ Deleting $1" && rm -f "$1"' sh {} \;
+# 1. Delete everything except wp-config.php & wp-content/
+find "$ROOT_DIR" -mindepth 1 \
+  ! -path "$ROOT_DIR/wp-config.php" \
+  ! -path "$ROOT_DIR/wp-content/*" \
+  -exec rm -rf {} +
 
-  # 3. Flag suspicious PHP code
-  echo "   • Checking for eval() injections:"
-  grep -iR --include="*.php" "eval(" "$DIR" || echo "     (none found)"
-  echo "   • Checking for base64_decode() use:"
-  grep -iR --include="*.php" "base64_decode(" "$DIR" || echo "     (none found)"
-  echo "     → Manually inspect any hits, remove payloads if malicious."
+# 2. Remove ELF binaries
+echo "   • Removing ELF binaries..."
+find "$ROOT_DIR" -type f -exec sh -c \
+  'file "$1" | grep -q ELF && echo "     ↳ Deleting $1" && rm -f "$1"' sh {} \;
 
-  # 4. Reinstall WP core
-  echo "   • Re-downloading WordPress core..."
-  wp core download --path="$DIR" --skip-content --force \
-    && echo "     ✔ Core reinstalled successfully."
-done
+# 3. Flag suspicious PHP code
+echo "   • Checking for eval() injections:"
+grep -iR --include="*.php" "eval(" "$ROOT_DIR" || echo "     (none found)"
 
-echo -e "
-✅  All done! Review grep hits above, then secure your sites (change passwords, update plugins/themes)."
+echo "   • Checking for base64_decode() use:"
+grep -iR --include="*.php" "base64_decode(" "$ROOT_DIR" || echo "     (none found)"
+
+echo "     → Manually inspect any hits and remove malicious code."
+
+# 4. Reinstall WP core
+echo "   • Re-downloading WordPress core..."
+wp core download --path="$ROOT_DIR" --skip-content --force \
+  && echo "     ✔ Core reinstalled successfully."
+
+echo -e "\n✅  Done! Review grep hits above, then secure your site (update credentials, plugins, themes)."
