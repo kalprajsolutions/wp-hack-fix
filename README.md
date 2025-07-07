@@ -74,3 +74,5 @@ curl -sSL https://raw.githubusercontent.com/kalprajsolutions/wp-hack-fix/main/wp
 ### 📄 License
 
 MIT © Kalpraj Solutions
+
+⚠️ Provided as-is; use with caution and review the script before running on production environments.
