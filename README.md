@@ -11,7 +11,7 @@ A lightweight, CLI-powered utility to automatically clean and restore hacked Wor
 Run the entire cleanup and restore workflow in a single command:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/kalprajsolutions/wp-hack-fix/main/wp-fix-hacked.sh | sudo bash
+curl -sSL https://raw.githubusercontent.com/kalprajsolutions/wp-hack-fix/main/wp-fix-hacked.sh | bash
 ```
 
 > This fetches the latest script from GitHub and executes it with elevated privileges. Ensure you trust the source before running.
